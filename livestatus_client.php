@@ -48,12 +48,12 @@ class LiveStatusClient
 
     public function runQuery($query)
     {
-        $this->connect();
+        $this->_connect();
         $this->query = $query;
 
         $query_string = $query->get_query_string();
         fwrite($this->socket, $query_string);
-        return $this->fetch_response();
+        return $this->fetchResponse();
     }
 
 }
