@@ -29,6 +29,7 @@ foreach ($_GET  as $key => $val) {
         } else {
             $query->addFilter($val);
         }
+        break;
     default:
         $query->setOption($key, $val);
     }
