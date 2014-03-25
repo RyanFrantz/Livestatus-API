@@ -51,7 +51,7 @@ class LiveStatusClient
         $this->_connect();
         $this->query = $query;
 
-        $query_string = $query->get_query_string();
+        $query_string = $query->getQueryString();
         fwrite($this->socket, $query_string);
         return $this->fetchResponse();
     }
