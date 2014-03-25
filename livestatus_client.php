@@ -9,12 +9,12 @@ class LiveStatusClient
         $this->pretty_print = false;
     }
 
-    private function connect()
+    private function _connect()
     {
         $this->socket = stream_socket_client("unix://{$this->socket_path}");
     }
 
-    private function parse_response($response)
+    private function _parseResponse($response)
     {
         $response = json_decode($response);
         $results = [];
@@ -35,7 +35,7 @@ class LiveStatusClient
         return json_encode($results,$json_opts);
     }
 
-    private function fetch_response()
+    private function _fetchResponse()
     {
         $response = '';
         while ($line = fgets($this->socket))
@@ -43,16 +43,16 @@ class LiveStatusClient
             $response .= $line;
         }
 
-        return $this->parse_response($response);
+        return $this->_parseResponse($response);
     }
 
-    public function run_query($query)
+    public function runQuery($query)
     {
         $this->connect();
         $this->query = $query;
 
         $query_string = $query->get_query_string();
-        fwrite($this->socket,$query_string);
+        fwrite($this->socket, $query_string);
         return $this->fetch_response();
     }
 
@@ -64,33 +64,43 @@ class LiveStatusQuery
     {
         $this->topic = $topic;
         $this->columns = $columns;
+        $this->filters = [];
         $this->options['OutputFormat'] = 'json';
     }
 
-    public function set_option($name, $value)
+    public function setOption($name, $value)
     {
         $this->options[$name] = $value;
     }
 
-    public function set_columns($column_list)
+    public function setColumns($column_list)
     {
         $this->columns = $column_list;
     }
 
-    public function get_query_string()
+    public function addFilter($filter)
+    {
+        $this->filters[] = $filter;
+    }
+
+    public function getQueryString()
     {
         $query = [];
 
         $query[] = "GET {$this->topic}";
-        $this->columns && $query[] = "Columns: " . join($this->columns," ");
-        foreach ($this->options as $key => $value)
-        {
+        $this->columns && $query[] = "Columns: " . join($this->columns, ' ');
+
+        foreach ($this->filters as $filter) {
+            $query[] = "Filter: $filter";
+        }
+
+        foreach ($this->options as $key => $value) {
             $query[] = "$key: $value";
         }
 
         $query[] = "\n";
 
-        return join($query,"\n");
+        return join($query, "\n");
 
     }
 }
