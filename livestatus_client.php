@@ -53,7 +53,7 @@ class LiveStatusClient
 
         $query_string = $query->getQueryString();
         fwrite($this->socket, $query_string);
-        return $this->fetchResponse();
+        return $this->_fetchResponse();
     }
 
 }
