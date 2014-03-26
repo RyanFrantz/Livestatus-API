@@ -14,6 +14,19 @@ class LiveStatusClient
         $this->socket = stream_socket_client("unix://{$this->socket_path}");
     }
 
+	private function _formatError($code,$message)
+	{
+		$error = [ "Error" => [ "Code" => $code, "Message" => $message]];
+		return json_encode($error,$this->_jsonOpts());
+	}
+
+	private function _jsonOpts()
+	{
+        $json_opts = null;
+        $this->pretty_print && $json_opts = JSON_PRETTY_PRINT;
+		return $json_opts;
+	}
+
     private function _parseResponse($response)
     {
         $response = json_decode($response);
@@ -33,20 +46,23 @@ class LiveStatusClient
             }
         }
 
-        $json_opts = null;
-
-        $this->pretty_print && $json_opts = JSON_PRETTY_PRINT;
-
-        return json_encode($results,$json_opts);
+        return json_encode($results,$this->_jsonOpts());
     }
 
     private function _fetchResponse()
     {
         $response = '';
+		$status_line = fgets($this->socket);
+		list($status,$length) = explode(' ',$status_line);
+
         while ($line = fgets($this->socket))
         {
             $response .= $line;
         }
+
+		if ($status != 200) {
+			return $this->_formatError($status,rtrim($response));
+		}
 
         return $this->_parseResponse($response);
     }
@@ -72,6 +88,7 @@ class LiveStatusQuery
         $this->filters = [];
         $this->stats = [];
         $this->options['OutputFormat'] = 'json';
+        $this->options['ResponseHeader'] = 'fixed16';
     }
 
     public function setOption($name, $value)
