@@ -30,6 +30,15 @@ foreach ($_GET  as $key => $val) {
             $query->addFilter($val);
         }
         break;
+    case 'Stats':
+        if (is_array($val)) {
+            foreach ($val as $subvalue) {
+                $query->addStat($subvalue);
+            }
+        } else {
+            $query->addStat($val);
+        }
+        break;
     default:
         $query->setOption($key, $val);
     }

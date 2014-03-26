@@ -18,14 +18,19 @@ class LiveStatusClient
     {
         $response = json_decode($response);
         $results = [];
-        $cols = $this->query->columns;
 
-        if (! $cols) {
-            $cols = array_shift($response);
-        }
+        if ($query->stats) { 
+            $results = $response;
+        } else {
+            $cols = $this->query->columns;
 
-        foreach ($response as $row) {
-            $results[] = array_combine($cols,$row);
+            if (! $cols) {
+                $cols = array_shift($response);
+            }
+
+            foreach ($response as $row) {
+                $results[] = array_combine($cols,$row);
+            }
         }
 
         $json_opts = null;
@@ -65,6 +70,7 @@ class LiveStatusQuery
         $this->topic = $topic;
         $this->columns = $columns;
         $this->filters = [];
+        $this->stats = [];
         $this->options['OutputFormat'] = 'json';
     }
 
@@ -83,6 +89,11 @@ class LiveStatusQuery
         $this->filters[] = $filter;
     }
 
+    public function addStat($stat)
+    {
+        $this->stats[] = $stat;
+    }
+
     public function getQueryString()
     {
         $query = [];
@@ -92,6 +103,10 @@ class LiveStatusQuery
 
         foreach ($this->filters as $filter) {
             $query[] = "Filter: $filter";
+        }
+
+        foreach ($this->stats as $stat) {
+            $query[] = "Stat: $stat";
         }
 
         foreach ($this->options as $key => $value) {
