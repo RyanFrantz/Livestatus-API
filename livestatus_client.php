@@ -19,7 +19,7 @@ class LiveStatusClient
         $response = json_decode($response);
         $results = [];
 
-        if ($query->stats) { 
+        if ($this->query->stats) { 
             $results = $response;
         } else {
             $cols = $this->query->columns;
@@ -106,7 +106,7 @@ class LiveStatusQuery
         }
 
         foreach ($this->stats as $stat) {
-            $query[] = "Stat: $stat";
+            $query[] = "Stats: $stat";
         }
 
         foreach ($this->options as $key => $value) {
