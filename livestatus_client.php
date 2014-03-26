@@ -54,17 +54,18 @@ class LiveStatusClient
 
     private function _fetchResponse()
     {
-        $response = '';
-        $status_line = fgets($this->socket);
-        list($status,$length) = explode(' ',$status_line);
+        $response = 'Unknown error';
+        $status = 500;
+        if ($status_line = fgets($this->socket)) {
+            list($status,$length) = explode(' ', $status_line);
 
-        while ($line = fgets($this->socket))
-        {
-            $response .= $line;
+            while ($line = fgets($this->socket)) {
+                $response .= $line;
+            }
+
         }
-
         if ($status != 200) {
-            throw new LiveStatusException(rtrim($response, $status));
+            throw new LiveStatusException($response, $status);
         }
 
         return $this->_parseResponse($response);
@@ -139,6 +140,3 @@ class LiveStatusQuery
 
     }
 }
-
-
-
