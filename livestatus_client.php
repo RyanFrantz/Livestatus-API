@@ -54,7 +54,7 @@ class LiveStatusClient
 
     private function _fetchResponse()
     {
-        $response = 'Unknown error';
+        $response = '';
         $status = 500;
         if ($status_line = fgets($this->socket)) {
             list($status,$length) = explode(' ', $status_line);
