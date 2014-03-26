@@ -43,7 +43,12 @@ foreach ($_GET  as $key => $val) {
         $query->setOption($key, $val);
     }
 }
+try {
+    echo $client->runQuery($query);
+} catch (LiveStatusException $e) {
+    http_response_code($e->getCode());
+    echo $e->toJson();
+}
 
-echo $client->runQuery($query);
 
 ?>

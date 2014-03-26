@@ -1,5 +1,13 @@
 <?php
 
+class LiveStatusException extends Exception
+{
+    public function toJson() {
+        $error = [ "Error" => [ "Code" => $this->code, "Message" => $this->message]];
+        return json_encode($error);
+    }
+}
+
 class LiveStatusClient
 {
     function __construct($socket_path)
@@ -14,18 +22,13 @@ class LiveStatusClient
         $this->socket = stream_socket_client("unix://{$this->socket_path}");
     }
 
-	private function _formatError($code,$message)
-	{
-		$error = [ "Error" => [ "Code" => $code, "Message" => $message]];
-		return json_encode($error,$this->_jsonOpts());
-	}
 
-	private function _jsonOpts()
-	{
+    private function _jsonOpts()
+    {
         $json_opts = null;
         $this->pretty_print && $json_opts = JSON_PRETTY_PRINT;
-		return $json_opts;
-	}
+        return $json_opts;
+    }
 
     private function _parseResponse($response)
     {
@@ -52,17 +55,17 @@ class LiveStatusClient
     private function _fetchResponse()
     {
         $response = '';
-		$status_line = fgets($this->socket);
-		list($status,$length) = explode(' ',$status_line);
+        $status_line = fgets($this->socket);
+        list($status,$length) = explode(' ',$status_line);
 
         while ($line = fgets($this->socket))
         {
             $response .= $line;
         }
 
-		if ($status != 200) {
-			return $this->_formatError($status,rtrim($response));
-		}
+        if ($status != 200) {
+            throw new LiveStatusException(rtrim($response, $status));
+        }
 
         return $this->_parseResponse($response);
     }
