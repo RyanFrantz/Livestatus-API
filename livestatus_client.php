@@ -80,6 +80,7 @@ class LiveStatusClient
         fwrite($this->socket, $query_string);
         $response = $this->_fetchResponse();
         fclose($this->socket);
+        return $response;
     }
 
     public function runCommand($command)
@@ -97,7 +98,7 @@ class LiveStatusClient
         foreach ($args  as $key => $val) {
             switch ($key) {
             case 'Columns':
-                $columns = split(',', $val);
+                $columns = explode(',', $val);
                 $query->setColumns($columns);
                 break;
             case 'Filter':
@@ -122,7 +123,7 @@ class LiveStatusClient
                 $query->setOption($key, $val);
             }
         }
-        return $client->runQuery($query);
+        return $this->runQuery($query);
     }
 
     private function _validateArgs($required, $args) {
