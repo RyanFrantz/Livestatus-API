@@ -126,7 +126,7 @@ class LiveStatusClient
         return $this->runQuery($query);
     }
 
-    private function _validateArgs($required, $args) {
+    private function _validateArgs(&$required, &$args) {
         foreach ($required as $field) {
             if (!array_key_exists($field, $args)) {
                 throw new LiveStatusException(
@@ -141,36 +141,41 @@ class LiveStatusClient
 
         $method = 'ACKNOWLEDGE_SVC_PROBLEM';
         $required = [
-            'host_name',
+            'host',
             'author',
             'comment',
         ];
 
         $fields = [
-            'host_name' => '',
-            'service_description' => '',
+            'host' => '',
+            'service' => '',
             'sticky'    => 1,
             'notify'    => 1,
+            'persistent'=> 1,
             'author'    => '',
             'comment'   => '',
         ];
 
 
-        $this->_validateArgs($required, $args);
+        #$this->_validateArgs($required, $args);
 
         foreach ($fields as $field => $val) {
-            if (array_key_exists($field)) {
+            if (array_key_exists($field,$args)) {
                 $fields[$field] = $args[$field];
             }
         }
 
-        if (!$fields['service_description']) {
-            unset($fields['service_description']);
+        if (!$fields['service']) {
+            unset($fields['service']);
             $method = 'ACKNOWLEDGE_HOST_PROBLEM';
         }
 
+
         $cmd = new LiveStatusCommand( array_merge([$method], array_values($fields)) );
-        $this-runCommand($cmd);
+
+	error_log($cmd->getCommandString());
+
+        $this->runCommand($cmd);
 
     }
 
@@ -246,7 +251,9 @@ class LiveStatusCommand
     {
         $command = "COMMAND ";
         $command .= sprintf("[%d] ", time());
-        $command .= join($args, ';');
+        $command .= join($this->args, ';');
+        $command .= "\n\n";
+        return $command;
     }
 }
 

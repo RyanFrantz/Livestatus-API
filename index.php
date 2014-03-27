@@ -3,6 +3,7 @@
 require "livestatus_client.php";
 
 ini_set('memory_limit', -1);
+#ini_set('always_populate_raw_post_data', 1);
 
 header('Content-Type: application/json');
 
@@ -27,7 +28,8 @@ try {
     switch ($method) {
 
     case 'acknowledge_problem':
-        $client->acknowledgeProblem($_POST);
+        $args = json_decode($HTTP_RAW_POST_DATA,true);
+        $client->acknowledgeProblem($args);
         echo json_encode(['OK']);
         break;
        
