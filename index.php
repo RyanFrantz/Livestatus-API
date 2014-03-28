@@ -24,31 +24,31 @@ $commands = [
 
 $method = $path_parts[1];
 
+$response = json_encode([ 'success' => true ]);
+
 try {
     switch ($method) {
 
     case 'acknowledge_problem':
         $args = json_decode($HTTP_RAW_POST_DATA,true);
         $client->acknowledgeProblem($args);
-        echo json_encode(['OK']);
         break;
        
     case 'schedule_downtime':
-        echo json_encode(['OK']);
         break;
 
     case 'enable_notifications':
-        echo json_encode(['OK']);
         break;
 
     case 'disable_notifications':
-        echo json_encode(['OK']);
         break;
 
     default:
-        echo $client->getQuery($method, $_GET);
+        $response =  $client->getQuery($method, $_GET);
 
     }
+    echo $response;
+
 } catch (LiveStatusException $e) {
     http_response_code($e->getCode());
     echo $e->toJson();
