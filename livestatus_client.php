@@ -126,7 +126,6 @@ class LiveStatusClient
         return $this->runQuery($query);
     }
 
-
     public function acknowledgeProblem($args) {
         $cmd = new AcknowledgeCommand($args);
         $this->runCommand($cmd);
@@ -207,6 +206,7 @@ abstract class LiveStatusCommand
     {
         foreach ($this->required as $field) {
             if (!array_key_exists($field, $this->args)) {
+		error_log("missing $field");
                 throw new LiveStatusException(
                     "Required field '$field' is missing", 
                     400
@@ -218,10 +218,11 @@ abstract class LiveStatusCommand
     protected function _processArgs()
     {
         foreach ($this->fields as $field => $val) {
-            if (array_key_exists($field,$this->args)) {
+            if (array_key_exists($field, $this->args)) {
                 $this->fields[$field] = $this->args[$field];
             }
         }
+        $this->args = $this->fields;
     }
 
     function getCommandString()
@@ -241,7 +242,7 @@ class AcknowledgeCommand extends LiveStatusCommand
 {
     function __construct($args=[])
     {
-        parent::__construct();
+        parent::__construct($args);
         $this->method = 'ACKNOWLEDGE_SVC_PROBLEM';
         $this->required = [
             'host',
@@ -264,8 +265,8 @@ class AcknowledgeCommand extends LiveStatusCommand
     {
         parent::_processArgs();
 
-        if (!$this->fields['service']) {
-            unset($this->fields['service']);
+        if (!$this->args['service']) {
+            unset($this->args['service']);
             $this->method = 'ACKNOWLEDGE_HOST_PROBLEM';
         }
     }
