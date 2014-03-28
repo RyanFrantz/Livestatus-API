@@ -299,7 +299,7 @@ class ScheduleDowntimeCommand extends LiveStatusCommand
             'service'    => '',
             'start_time' => 0,
             'end_time'   => 0,
-            'fixed'      => 0,
+            'fixed'      => 1,
             'trigger_id' => 0,
             'duration'   => 0,
             'author'     => '',
@@ -315,6 +315,10 @@ class ScheduleDowntimeCommand extends LiveStatusCommand
             unset($this->args['service']);
             $this->method = 'SCHEDULE_HOST_DOWNTIME';
         }
+
+        $this->args['start_time'] = time();
+        $this->args['end_time'] = time() + $this->args['duration'];
+
     }
 }
 
