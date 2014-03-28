@@ -130,6 +130,16 @@ class LiveStatusClient
         $cmd = new AcknowledgeCommand($args);
         $this->runCommand($cmd);
     }
+    
+    public function scheduleDowntime($args) {
+        $cmd = new ScheduleDowntimeCommand($args);
+        $this->runCommand($cmd);
+    }
+
+    public function disableNotifications($args) {
+        $cmd = new DisableNotificationsCommand($args);
+        $this->runCommand($cmd);
+    }
 
 }
 
@@ -268,6 +278,69 @@ class AcknowledgeCommand extends LiveStatusCommand
         if (!$this->args['service']) {
             unset($this->args['service']);
             $this->method = 'ACKNOWLEDGE_HOST_PROBLEM';
+        }
+    }
+}
+
+class ScheduleDowntimeCommand extends LiveStatusCommand
+{
+    function __construct($args=[])
+    {
+        parent::__construct($args);
+        $this->method = 'SCHEDULE_SVC_DOWNTIME';
+        $this->required = [
+            'host',
+            'author',
+            'comment',
+        ];
+
+        $this->fields = [
+            'host'       => '',
+            'service'    => '',
+            'start_time' => 0,
+            'end_time'   => 0,
+            'fixed'      => 0,
+            'trigger_id' => 0,
+            'duration'   => 0,
+            'author'     => '',
+            'comment'    => '',
+        ];
+    }
+
+    function _processArgs()
+    {
+        parent::_processArgs();
+
+        if (!$this->args['service']) {
+            unset($this->args['service']);
+            $this->method = 'SCHEDULE_HOST_DOWNTIME';
+        }
+    }
+}
+
+class DisableNotificationsCommand extends LiveStatusCommand
+{
+    function __construct($args=[])
+    {
+        parent::__construct($args);
+        $this->method = 'DISABLE_SVC_NOTIFICATIONS';
+        $this->required = [
+            'host',
+        ];
+
+        $this->fields = [
+            'host'       => '',
+            'service'    => '',
+        ];
+    }
+
+    function _processArgs()
+    {
+        parent::_processArgs();
+
+        if (!$this->args['service']) {
+            unset($this->args['service']);
+            $this->method = 'DISABLE_HOST_NOTIFICATIONS';
         }
     }
 }

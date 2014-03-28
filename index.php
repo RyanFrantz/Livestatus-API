@@ -26,21 +26,26 @@ $method = $path_parts[1];
 
 $response = json_encode([ 'success' => true ]);
 
+if (isset($HTTP_RAW_POST_DATA)) {
+    $args = json_decode($HTTP_RAW_POST_DATA,true);
+}
+
 try {
     switch ($method) {
 
     case 'acknowledge_problem':
-        $args = json_decode($HTTP_RAW_POST_DATA,true);
         $client->acknowledgeProblem($args);
         break;
        
     case 'schedule_downtime':
+        $client->scheduleDowntime($args);
         break;
 
     case 'enable_notifications':
         break;
 
     case 'disable_notifications':
+        $client->disableNotifications($args);
         break;
 
     default:
