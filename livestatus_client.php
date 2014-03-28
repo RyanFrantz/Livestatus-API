@@ -126,57 +126,10 @@ class LiveStatusClient
         return $this->runQuery($query);
     }
 
-    private function _validateArgs(&$required, &$args) {
-        foreach ($required as $field) {
-            if (!array_key_exists($field, $args)) {
-                throw new LiveStatusException(
-                    "Required field '$field' is missing", 
-                    400
-                );
-            }
-        }
-    }
 
     public function acknowledgeProblem($args) {
-
-        $method = 'ACKNOWLEDGE_SVC_PROBLEM';
-        $required = [
-            'host',
-            'author',
-            'comment',
-        ];
-
-        $fields = [
-            'host' => '',
-            'service' => '',
-            'sticky'    => 1,
-            'notify'    => 1,
-            'persistent'=> 1,
-            'author'    => '',
-            'comment'   => '',
-        ];
-
-
-        #$this->_validateArgs($required, $args);
-
-        foreach ($fields as $field => $val) {
-            if (array_key_exists($field,$args)) {
-                $fields[$field] = $args[$field];
-            }
-        }
-
-        if (!$fields['service']) {
-            unset($fields['service']);
-            $method = 'ACKNOWLEDGE_HOST_PROBLEM';
-        }
-
-
-        $cmd = new LiveStatusCommand( array_merge([$method], array_values($fields)) );
-
-	error_log($cmd->getCommandString());
-
+        $cmd = new AcknowledgeCommand($args);
         $this->runCommand($cmd);
-
     }
 
 }
@@ -239,21 +192,81 @@ class LiveStatusQuery
     }
 }
 
-class LiveStatusCommand
+abstract class LiveStatusCommand
 {
     function __construct($args=[])
     {
-        $this->method = $args[0];
+        $this->method = '';
         $this->args   = $args;
+        $this->required = [];
+        $this->fields = [];
+    }
+
+
+    private function _validateArgs()
+    {
+        foreach ($this->required as $field) {
+            if (!array_key_exists($field, $this->args)) {
+                throw new LiveStatusException(
+                    "Required field '$field' is missing", 
+                    400
+                );
+            }
+        }
+    }
+
+    protected function _processArgs()
+    {
+        foreach ($this->fields as $field => $val) {
+            if (array_key_exists($field,$this->args)) {
+                $this->fields[$field] = $this->args[$field];
+            }
+        }
     }
 
     function getCommandString()
     {
+        $this->_validateArgs();
+        $this->_processArgs();
         $command = "COMMAND ";
         $command .= sprintf("[%d] ", time());
+        $command .= "{$this->method};";
         $command .= join($this->args, ';');
         $command .= "\n\n";
         return $command;
     }
 }
 
+class AcknowledgeCommand extends LiveStatusCommand
+{
+    function __construct($args=[])
+    {
+        parent::__construct();
+        $this->method = 'ACKNOWLEDGE_SVC_PROBLEM';
+        $this->required = [
+            'host',
+            'author',
+            'comment',
+        ];
+
+        $this->fields = [
+            'host' => '',
+            'service' => '',
+            'sticky'    => 1,
+            'notify'    => 1,
+            'persistent'=> 1,
+            'author'    => '',
+            'comment'   => '',
+        ];
+    }
+
+    function _processArgs()
+    {
+        parent::_processArgs();
+
+        if (!$this->fields['service']) {
+            unset($this->fields['service']);
+            $this->method = 'ACKNOWLEDGE_HOST_PROBLEM';
+        }
+    }
+}
