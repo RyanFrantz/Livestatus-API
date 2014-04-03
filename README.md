@@ -8,6 +8,20 @@ All examples in this document assume that the API is available at
 
     http://nagios.example.com/livestatus-api/
 
+## Response Format
+
+All responses are in JSON and have the following format:
+
+    {"success": <bool>, "content": <object>}
+
+If "success" is true, "content" will contain the requested data. If false, it
+will contain
+
+    {"code": <int>, "message": <string>}
+
+where "code" is the mk-livestatus error code and "message" is a human-readable
+explanation of the error.
+
 ## Query interface
 
 The query interface returns a list of objects in JSON. The available endpoints are
