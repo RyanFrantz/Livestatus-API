@@ -49,7 +49,7 @@ try {
         break;
 
     default:
-        $response =  $client->getQuery($method, $_GET);
+        $response['content'] =  $client->getQuery($method, $_GET);
 
     }
 
