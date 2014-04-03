@@ -2,10 +2,6 @@
 
 class LiveStatusException extends Exception
 {
-    public function toJson() {
-        $error = [ "Error" => [ "Code" => $this->code, "Message" => $this->message]];
-        return json_encode($error);
-    }
 }
 
 class LiveStatusClient
@@ -49,12 +45,12 @@ class LiveStatusClient
             }
         }
 
-        return json_encode($results,$this->_jsonOpts());
+        return $results;
     }
 
     private function _fetchResponse()
     {
-        $response = '';
+        $response = 'Unknown error.';
         $status = 500;
         if ($status_line = fgets($this->socket)) {
             list($status,$length) = explode(' ', $status_line);

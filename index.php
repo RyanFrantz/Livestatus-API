@@ -24,7 +24,7 @@ $commands = [
 
 $method = $path_parts[1];
 
-$response = json_encode([ 'success' => true ]);
+$response = [ 'success' => true ];
 
 if (isset($HTTP_RAW_POST_DATA)) {
     $args = json_decode($HTTP_RAW_POST_DATA,true);
@@ -49,14 +49,15 @@ try {
         break;
 
     default:
-        $response =  $client->getQuery($method, $_GET);
+        $response['content'] =  $client->getQuery($method, $_GET);
 
     }
-    echo $response;
 
 } catch (LiveStatusException $e) {
+    $response['success'] = false;
+    $response['content'] = ['code' => $e->getCode(), 'message' => $e->getMessage()];
     http_response_code($e->getCode());
-    echo $e->toJson();
 }
+echo json_encode($response);
 
 ?>
