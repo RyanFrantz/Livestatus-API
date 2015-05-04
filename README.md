@@ -82,6 +82,54 @@ with "api" in state OK:
 
     http://nagios.example.com/livestatus-api/hosts?&Stats[]=name%20~%20%5Eapi&Filter[]=state%20%3D%200
     
-## Command interface
+## Command Interface
 
-COMING SOON
+All calls to ``livestatus-api`` to execute Nagios command **must be HTTP POST requests**.
+
+### ``disable_notifications``
+
+Notifications for a host, a host's service, or all of the host's services can be disabled via the ``disable_notifications`` endpoint.
+
+#### Disable Host Notifications
+
+Send a request that includes a valid 'host' value:
+
+    curl -s -XPOST 'https://nagios.example.com/livestatus-api/disable_notifications' -d '{"host": "host.example.com"}'
+
+#### Disable Notifications for a Host's Service
+
+Send a request that includes valid 'host' and 'service' values:
+
+    curl -s -XPOST 'https://nagios.example.com/livestatus-api/disable_notifications' -d '{"host": "host.example.com", "service": "httpd"}'
+
+#### Disable Notifications for All of a Host's Services
+
+Send a request that includes a valid 'host' value and set 'scope' to 'all':
+
+    curl -s -XPOST 'https://nagios.example.com/livestatus-api/disable_notifications' -d '{"host": "host.example.com", "scope": "all"}'
+
+### ``enable_notifications``
+
+Notifications for a host, a host's service, or all of the host's services can be enabled via the ``enable_notifications`` endpoint.
+
+#### Enable Host Notifications
+
+Send a request that includes a valid 'host' value:
+
+    curl -s -XPOST 'https://nagios.example.com/livestatus-api/enable_notifications' -d '{"host": "host.example.com"}'
+
+#### Enable Notifications for a Host's Service
+
+Send a request that includes valid 'host' and 'service' values:
+
+    curl -s -XPOST 'https://nagios.example.com/livestatus-api/enable_notifications' -d '{"host": "host.example.com", "service": "httpd"}'
+
+#### Enable Notifications for All of a Host's Services
+
+Send a request that includes a valid 'host' value and set 'scope' to 'all':
+
+    curl -s -XPOST 'https://nagios.example.com/livestatus-api/enable_notifications' -d '{"host": "host.example.com", "scope": "all"}'
+
+### COMING SOON
+
+Keep yer eyes peeled for the 'acknowledge_problem' and 'schedule_downtime' endpoints!

@@ -79,17 +79,27 @@ class LiveStatusClient
         return $response;
     }
 
+    public function verify_post_request() {
+        // Defined in index.php.
+        global $request_method;
+        if ($request_method != "POST") {
+            header('Allow: POST');
+            throw new LiveStatusException("Invalid request method: {$request_method}. Use POST instead.", "405");
+        }
+    }
+
     public function runCommand($command)
     {
-        $this->_connect();
+        $this->verify_post_request();
         $command_string = $command->getCommandString();
+        $this->_connect();
         fwrite($this->socket, $command_string);
         fclose($this->socket);
     }
 
-    function getQuery($method,$args=[]) 
+    function getQuery($action,$args=[])
     {
-        $query = new LiveStatusQuery($method);
+        $query = new LiveStatusQuery($action);
 
         foreach ($args  as $key => $val) {
             switch ($key) {
@@ -134,6 +144,11 @@ class LiveStatusClient
 
     public function disableNotifications($args) {
         $cmd = new DisableNotificationsCommand($args);
+        $this->runCommand($cmd);
+    }
+
+    public function enableNotifications($args) {
+        $cmd = new EnableNotificationsCommand($args);
         $this->runCommand($cmd);
     }
 
@@ -201,7 +216,7 @@ abstract class LiveStatusCommand
 {
     function __construct($args=[])
     {
-        $this->method = '';
+        $this->action = '';
         $this->args   = $args;
         $this->required = [];
         $this->fields = [];
@@ -237,7 +252,7 @@ abstract class LiveStatusCommand
         $this->_processArgs();
         $command = "COMMAND ";
         $command .= sprintf("[%d] ", time());
-        $command .= "{$this->method};";
+        $command .= "{$this->action};";
         $command .= join($this->args, ';');
         $command .= "\n\n";
         return $command;
@@ -249,7 +264,7 @@ class AcknowledgeCommand extends LiveStatusCommand
     function __construct($args=[])
     {
         parent::__construct($args);
-        $this->method = 'ACKNOWLEDGE_SVC_PROBLEM';
+        $this->action = 'ACKNOWLEDGE_SVC_PROBLEM';
         $this->required = [
             'host',
             'author',
@@ -273,7 +288,7 @@ class AcknowledgeCommand extends LiveStatusCommand
 
         if (!$this->args['service']) {
             unset($this->args['service']);
-            $this->method = 'ACKNOWLEDGE_HOST_PROBLEM';
+            $this->action = 'ACKNOWLEDGE_HOST_PROBLEM';
         }
     }
 }
@@ -283,7 +298,7 @@ class ScheduleDowntimeCommand extends LiveStatusCommand
     function __construct($args=[])
     {
         parent::__construct($args);
-        $this->method = 'SCHEDULE_SVC_DOWNTIME';
+        $this->action = 'SCHEDULE_SVC_DOWNTIME';
         $this->required = [
             'host',
             'author',
@@ -309,7 +324,7 @@ class ScheduleDowntimeCommand extends LiveStatusCommand
 
         if (!$this->args['service']) {
             unset($this->args['service']);
-            $this->method = 'SCHEDULE_HOST_DOWNTIME';
+            $this->action = 'SCHEDULE_HOST_DOWNTIME';
         }
 
         $this->args['start_time'] = time();
@@ -323,14 +338,18 @@ class DisableNotificationsCommand extends LiveStatusCommand
     function __construct($args=[])
     {
         parent::__construct($args);
-        $this->method = 'DISABLE_SVC_NOTIFICATIONS';
+        $this->action = 'DISABLE_SVC_NOTIFICATIONS';
         $this->required = [
             'host',
         ];
 
+        // The 'scope' field helps define if we want to disable notifications
+        // for all the host's services. Its only valid value is 'all' and it's
+        // not required/used by any external Nagios commands.
         $this->fields = [
             'host'       => '',
             'service'    => '',
+            'scope'      => '',
         ];
     }
 
@@ -338,9 +357,50 @@ class DisableNotificationsCommand extends LiveStatusCommand
     {
         parent::_processArgs();
 
-        if (!$this->args['service']) {
+        // Do we want to disable all services under the given host?
+        if ($this->args['scope'] && $this->args['scope'] == "all") {
+            // Unset the 'service' arg if present; it's redundant in this context.
             unset($this->args['service']);
-            $this->method = 'DISABLE_HOST_NOTIFICATIONS';
+            $this->action = 'DISABLE_HOST_SVC_NOTIFICATIONS';
+        } elseif (!$this->args['service']) {
+            unset($this->args['service']);
+            $this->action = 'DISABLE_HOST_NOTIFICATIONS';
+        }
+    }
+}
+
+class EnableNotificationsCommand extends LiveStatusCommand
+{
+    function __construct($args=[])
+    {
+        parent::__construct($args);
+        $this->action = 'ENABLE_SVC_NOTIFICATIONS';
+        $this->required = [
+            'host',
+        ];
+
+        // The 'scope' field helps define if we want to enable notifications
+        // for all the host's services. Its only valid value is 'all' and it's
+        // not required/used by any external Nagios commands.
+        $this->fields = [
+            'host'       => '',
+            'service'    => '',
+            'scope'      => '',
+        ];
+    }
+
+    function _processArgs()
+    {
+        parent::_processArgs();
+
+        // Do we want to enable all services under the given host?
+        if ($this->args['scope'] && $this->args['scope'] == "all") {
+            // Unset the 'service' arg if present; it's redundant in this context.
+            unset($this->args['service']);
+            $this->action = 'ENABLE_HOST_SVC_NOTIFICATIONS';
+        } elseif (!$this->args['service']) {
+            unset($this->args['service']);
+            $this->action = 'ENABLE_HOST_NOTIFICATIONS';
         }
     }
 }
