@@ -86,6 +86,20 @@ with "api" in state OK:
 
 All calls to ``livestatus-api`` to execute Nagios commands **must be HTTP POST requests**.
 
+### Acknowledgements
+
+Acknowledgements for host and service alerts can be sent via the ``acknowledge_problem`` endpoint.
+
+#### Acknowledge Host Alerts
+
+    curl -is -XPOST https://nagios.example.com/livestatus-api/acknowledge_problem -d '{"host": "host.example.com", "author": "rfrantz", "comment": "acked from livestatus"}'
+
+#### Acknowledge Service Alerts
+
+Acknowledging service alerts is similar to host alerts, with the addition of the ``service`` parameter:
+
+    curl -is -XPOST https://nagios.example.com/livestatus-api/acknowledge_problem -d '{"host": "host.example.com", "service": "Apache", "author": "rfrantz", "comment": "acked from livestatus"}'
+
 ### Downtime
 
 #### ``cancel_downtime``
@@ -113,20 +127,6 @@ Schedule downtime for a host as follows:
 **NOTE**: The ``duration`` field expects a value whose unit is in seconds.
 
 Downtime can be scheduled for a host.
-
-### Acknowledgements
-
-Acknowledgements for host and service alerts can be sent via the ``acknowledge_problem`` endpoint.
-
-#### Acknowledge Host Alerts
-
-    curl -is -XPOST https://nagios.example.com/livestatus-api/acknowledge_problem -d '{"host": "host.example.com", "author": "rfrantz", "comment": "acked from livestatus"}'
-
-#### Acknowledge Service Alerts
-
-Acknowledging service alerts is similar to host alerts, with the addition of the ``service`` parameter:
-
-    curl -is -XPOST https://nagios.example.com/livestatus-api/acknowledge_problem -d '{"host": "host.example.com", "service": "Apache", "author": "rfrantz", "comment": "acked from livestatus"}'
 
 ### Notifications
 
