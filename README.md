@@ -84,52 +84,82 @@ with "api" in state OK:
     
 ## Command Interface
 
-All calls to ``livestatus-api`` to execute Nagios command **must be HTTP POST requests**.
+All calls to ``livestatus-api`` to execute Nagios commands **must be HTTP POST requests**.
 
-### ``disable_notifications``
+### Downtime
+
+#### ``cancel_downtime``
+
+Existing scheduled downtimes for a host can be canceled. ``cancel_downtime``
+expects the ``downtime_id`` parameter. Downtime IDs can be found by querying a
+host and extracting the ``downtimes`` array:
+
+    curl -s https://nagios.example.com/livestatus-api/hosts?Filter=name%20%3D%20my_host | jq '.' | grep 'downtimes"' -A 2
+    
+    "downtimes": [
+        12345
+    ],
+
+The subsequent request to cancel the host's downtime is:
+
+    curl -s -XPOST 'https://nagios.example.com/livestatus-api/cancel_downtime' -d '{"downtime_id": "12345"}'
+
+#### ``schedule_downtime``
+
+Schedule downtime for a host as follows:
+
+    curl -s -XPOST 'https://nagios.example.com/livestatus-api/schedule_downtime' -d '{"host": "host.example.com", "duration": "7200", "author": "rfrantz", "comment": "Downtimed via livestatus"}'
+
+**NOTE**: The ``duration`` field expects a value whose unit is in seconds.
+
+Downtime can be scheduled for a host.
+
+### Notifications
+
+#### ``disable_notifications``
 
 Notifications for a host, a host's service, or all of the host's services can be disabled via the ``disable_notifications`` endpoint.
 
-#### Disable Host Notifications
+##### Disable Host Notifications
 
 Send a request that includes a valid 'host' value:
 
     curl -s -XPOST 'https://nagios.example.com/livestatus-api/disable_notifications' -d '{"host": "host.example.com"}'
 
-#### Disable Notifications for a Host's Service
+##### Disable Notifications for a Host's Service
 
 Send a request that includes valid 'host' and 'service' values:
 
     curl -s -XPOST 'https://nagios.example.com/livestatus-api/disable_notifications' -d '{"host": "host.example.com", "service": "httpd"}'
 
-#### Disable Notifications for All of a Host's Services
+##### Disable Notifications for All of a Host's Services
 
 Send a request that includes a valid 'host' value and set 'scope' to 'all':
 
     curl -s -XPOST 'https://nagios.example.com/livestatus-api/disable_notifications' -d '{"host": "host.example.com", "scope": "all"}'
 
-### ``enable_notifications``
+#### ``enable_notifications``
 
 Notifications for a host, a host's service, or all of the host's services can be enabled via the ``enable_notifications`` endpoint.
 
-#### Enable Host Notifications
+##### Enable Host Notifications
 
 Send a request that includes a valid 'host' value:
 
     curl -s -XPOST 'https://nagios.example.com/livestatus-api/enable_notifications' -d '{"host": "host.example.com"}'
 
-#### Enable Notifications for a Host's Service
+##### Enable Notifications for a Host's Service
 
 Send a request that includes valid 'host' and 'service' values:
 
     curl -s -XPOST 'https://nagios.example.com/livestatus-api/enable_notifications' -d '{"host": "host.example.com", "service": "httpd"}'
 
-#### Enable Notifications for All of a Host's Services
+##### Enable Notifications for All of a Host's Services
 
 Send a request that includes a valid 'host' value and set 'scope' to 'all':
 
     curl -s -XPOST 'https://nagios.example.com/livestatus-api/enable_notifications' -d '{"host": "host.example.com", "scope": "all"}'
 
-### COMING SOON
+## COMING SOON
 
-Keep yer eyes peeled for the 'acknowledge_problem' and 'schedule_downtime' endpoints!
+Keep yer eyes peeled for the 'acknowledge_problem' endpoint!

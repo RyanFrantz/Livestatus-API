@@ -137,6 +137,11 @@ class LiveStatusClient
         $this->runCommand($cmd);
     }
     
+    public function cancelDowntime($args) {
+        $cmd = new CancelDowntimeCommand($args);
+        $this->runCommand($cmd);
+    }
+
     public function scheduleDowntime($args) {
         $cmd = new ScheduleDowntimeCommand($args);
         $this->runCommand($cmd);
@@ -289,6 +294,32 @@ class AcknowledgeCommand extends LiveStatusCommand
         if (!$this->args['service']) {
             unset($this->args['service']);
             $this->action = 'ACKNOWLEDGE_HOST_PROBLEM';
+        }
+    }
+}
+
+class CancelDowntimeCommand extends LiveStatusCommand
+{
+    function __construct($args=[])
+    {
+        parent::__construct($args);
+        $this->action = 'DEL_SVC_DOWNTIME';
+        $this->required = [
+            'downtime_id'
+        ];
+
+        $this->fields = [
+            'downtime_id'       => ''
+        ];
+    }
+
+    function _processArgs()
+    {
+        parent::_processArgs();
+
+        if (!$this->args['service']) {
+            unset($this->args['service']);
+            $this->action = 'DEL_HOST_DOWNTIME';
         }
     }
 }

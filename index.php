@@ -13,15 +13,6 @@ $request_method = $_SERVER['REQUEST_METHOD'];
 $client = new LiveStatusClient('/var/nagios/var/rw/live');
 $client->pretty_print = true;
 
-/*
-$commands = [
-    'acknowledege_problem'
-    'schedule_downtime',
-    'enable_notifications',
-    'disable_notifications'
-];
-*/
-
 $action = $path_parts[1];
 
 $response = [ 'success' => true ];
@@ -35,6 +26,10 @@ try {
         $client->acknowledgeProblem($args);
         break;
        
+    case 'cancel_downtime':
+        $client->cancelDowntime($args);
+        break;
+
     case 'schedule_downtime':
         $client->scheduleDowntime($args);
         break;
