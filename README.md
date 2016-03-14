@@ -114,6 +114,20 @@ Schedule downtime for a host as follows:
 
 Downtime can be scheduled for a host.
 
+### Acknowledgements
+
+Acknowledgements for host and service alerts can be sent via the ``acknowledge_problem`` endpoint.
+
+#### Acknowledge Host Alerts
+
+    curl -is -XPOST https://nagios.example.com/livestatus-api/acknowledge_problem -d '{"host": "host.example.com", "author": "rfrantz", "comment": "acked from livestatus"}'
+
+#### Acknowledge Service Alerts
+
+Acknowledging service alerts is similar to host alerts, with the addition of the ``service`` parameter:
+
+    curl -is -XPOST https://nagios.example.com/livestatus-api/acknowledge_problem -d '{"host": "host.example.com", "service": "Apache", "author": "rfrantz", "comment": "acked from livestatus"}'
+
 ### Notifications
 
 #### ``disable_notifications``
