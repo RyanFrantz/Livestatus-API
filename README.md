@@ -60,7 +60,7 @@ To limit the returned data to a subset of the available fields, pass a Columns
 query parameter containing a comma-separated list of column names. To fetch the
 name and services list for all hosts:
 
-    http://nagios.example.com/livestatus-api/hosts?columns=name,services
+    http://nagios.example.com/livestatus-api/hosts?Columns=name,services
 
 ### Filters
 
