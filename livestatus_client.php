@@ -303,13 +303,14 @@ class CancelDowntimeCommand extends LiveStatusCommand
     function __construct($args=[])
     {
         parent::__construct($args);
-        $this->action = 'DEL_SVC_DOWNTIME';
+        $this->action = 'DEL_HOST_DOWNTIME';
         $this->required = [
             'downtime_id'
         ];
 
         $this->fields = [
-            'downtime_id'       => ''
+            'downtime_id'       => '',
+            'service'           => null,
         ];
     }
 
@@ -317,9 +318,8 @@ class CancelDowntimeCommand extends LiveStatusCommand
     {
         parent::_processArgs();
 
-        if (!$this->args['service']) {
-            unset($this->args['service']);
-            $this->action = 'DEL_HOST_DOWNTIME';
+        if (isset($this->args['service'])) {
+            $this->action = 'DEL_SVC_DOWNTIME';
         }
     }
 }

@@ -118,6 +118,11 @@ The subsequent request to cancel the host's downtime is:
 
     curl -s -XPOST 'https://nagios.example.com/livestatus-api/cancel_downtime' -d '{"downtime_id": "12345"}'
 
+To cancel the downtime for a service, pass the name of the service along with the downtime_id:
+
+    curl -s -XPOST 'https://nagios.example.com/livestatus-api/cancel_downtime' -d '{"downtime_id": "12345", "service": "CPU"}'
+
+
 #### ``schedule_downtime``
 
 Schedule downtime for a host as follows:
@@ -126,7 +131,9 @@ Schedule downtime for a host as follows:
 
 **NOTE**: The ``duration`` field expects a value whose unit is in seconds.
 
-Downtime can be scheduled for a host.
+Downtimes can be scheduled for a particular service by adding a `"service"` parameter:
+
+    curl -s -XPOST 'https://nagios.example.com/livestatus-api/schedule_downtime' -d '{"host": "host.example.com", "service": "CPU", duration": "7200", "author": "rfrantz", "comment": "Downtimed via livestatus"}'
 
 ### Notifications
 
