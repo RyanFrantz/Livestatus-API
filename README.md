@@ -64,7 +64,7 @@ name and services list for all hosts:
 
 ### Filters
 
-To filter the result set to records meeting a critiera, pass one or more
+To filter the result set to records meeting some criteria, pass one or more
 Filter[] params. Each Filter is a urlencoded LQL filter (see the [mk-livestatus
 documentation](http://mathias-kettner.com/checkmk_livestatus.html#H1:LQL - The Livestatus Query Language) 
 for detailed LQL filter syntax). If more than one filter is specified, they are 
